@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.axway.library</groupId>
+    <artifactId>openapi-validator</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <lombok.version>1.18.30</lombok.version>
+        <apigateway.version>7.7.0.20230830</apigateway.version>
+        <apigateway.library.version>7.7.0.20230830-3</apigateway.library.version>
+        <apigateway.common.version>2.11.0</apigateway.common.version>
+        <jackson-core.version>2.16.0</jackson-core.version>
+        <httpclient5.version>5.3</httpclient5.version>
+        <swagger-request-validator-core.version>2.39.0</swagger-request-validator-core.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents.client5</groupId>
+            <artifactId>httpclient5</artifactId>
+            <version>${httpclient5.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.atlassian.oai</groupId>
+            <artifactId>swagger-request-validator-core</artifactId>
+            <version>${swagger-request-validator-core.version}</version>
+        </dependency>
+
+        <!-- api gw dependencies -->
+        <dependency>
+            <groupId>com.axway.apigw</groupId>
+            <artifactId>apigw-common</artifactId>
+            <version>${apigateway.common.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/apigw-dependencies/${apigateway.version}/apigw-common.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.vordel.mime</groupId>
+            <artifactId>vordel-mime</artifactId>
+            <version>${apigateway.library.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/apigw-dependencies/${apigateway.version}/vordel-mime.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.vordel.trace</groupId>
+            <artifactId>vordel-trace</artifactId>
+            <version>${apigateway.library.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/apigw-dependencies/${apigateway.version}/vordel-trace.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>${maven-assembly-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
