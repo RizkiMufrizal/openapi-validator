@@ -21,6 +21,7 @@
         <jackson-core.version>2.16.0</jackson-core.version>
         <httpclient5.version>5.3</httpclient5.version>
         <swagger-request-validator-core.version>2.39.0</swagger-request-validator-core.version>
+        <caffeine.version>3.1.8</caffeine.version>
     </properties>
 
     <dependencies>
@@ -44,6 +45,11 @@
             <groupId>com.atlassian.oai</groupId>
             <artifactId>swagger-request-validator-core</artifactId>
             <version>${swagger-request-validator-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
         </dependency>
 
         <!-- api gw dependencies -->

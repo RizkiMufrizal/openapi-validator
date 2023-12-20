@@ -6,6 +6,9 @@ import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.Response;
 import com.atlassian.oai.validator.report.ValidationReport;
 import com.atlassian.oai.validator.report.ValidationReport.Message;
+import com.axway.library.common.CacheExposurePath2SpecifiedPathMap;
+import com.axway.library.common.CacheInstance;
+import com.axway.library.common.CacheInstanceAPIIDs;
 import com.axway.library.common.Constant;
 import com.axway.library.common.TraceLevel;
 import com.axway.library.common.Utils;
@@ -20,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,14 +32,14 @@ import java.util.Optional;
  * OpenAPIValidator
  */
 public class OpenAPIValidator {
-    private static final Map<Integer, OpenAPIValidator> instances = new HashMap<>();
 
-    private static final Map<String, OpenAPIValidator> instances4APIIDs = new HashMap<>();
+    private static final CacheInstance cacheInstance = CacheInstance.getInstance();
+
+    private static final CacheInstanceAPIIDs cacheInstanceApiIds = CacheInstanceAPIIDs.getInstance();
+
+    private static final CacheExposurePath2SpecifiedPathMap cacheExposurePath2SpecifiedPathMap = CacheExposurePath2SpecifiedPathMap.getInstance();
 
     private OpenApiInteractionValidator validator;
-
-    @Getter
-    private final MaxSizeHashMap<String, Object> exposurePath2SpecifiedPathMap = new MaxSizeHashMap<>();
 
     @Setter
     @Getter
@@ -46,38 +48,40 @@ public class OpenAPIValidator {
     @Setter
     private boolean decodeQueryParams = true;
 
-    public static synchronized OpenAPIValidator getInstance(String openAPISpec) {
+    public static OpenAPIValidator getInstance(String openAPISpec) {
         int hashCode = openAPISpec.hashCode();
-        if (instances.containsKey(hashCode)) {
+        var openAPIValidator = cacheInstance.getCache().getIfPresent(hashCode);
+        if (openAPIValidator != null) {
             Utils.traceMessage("Using existing OpenAPIValidator instance for API-Specification.", TraceLevel.INFO);
-            return instances.get(hashCode);
+            return openAPIValidator;
         } else {
             Utils.traceMessage("Creating new OpenAPI validator instance for given API-Specification.", TraceLevel.INFO);
             OpenAPIValidator validator = new OpenAPIValidator(openAPISpec);
-            instances.put(hashCode, validator);
+            cacheInstance.getCache().put(hashCode, validator);
             return validator;
         }
     }
 
-    public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password, boolean useOriginalAPISpec) throws Exception {
+    public static OpenAPIValidator getInstance(String apiId, String username, String password, boolean useOriginalAPISpec) throws Exception {
         return getInstance(apiId, username, password, Constant.apiManagerURL, Constant.apiManagerVersion, useOriginalAPISpec);
     }
 
-    public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version) throws Exception {
+    public static OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version) throws Exception {
         return getInstance(apiId, username, password, apiManagerUrl, version, false);
     }
 
-    public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password) throws Exception {
+    public static OpenAPIValidator getInstance(String apiId, String username, String password) throws Exception {
         return getInstance(apiId, username, password, Constant.apiManagerURL, Constant.apiManagerVersion, false);
     }
 
-    public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version, boolean useOriginalAPISpec) throws Exception {
-        if (instances4APIIDs.containsKey(apiId)) {
+    public static OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version, boolean useOriginalAPISpec) throws Exception {
+        var openAPIValidator = cacheInstanceApiIds.getCache().getIfPresent(apiId);
+        if (openAPIValidator != null) {
             Utils.traceMessage("Using cached instance of OpenAPI validator for API-ID: " + apiId, TraceLevel.DEBUG);
-            return instances4APIIDs.get(apiId);
+            return openAPIValidator;
         } else {
             OpenAPIValidator validator = new OpenAPIValidator(apiId, username, password, apiManagerUrl, version, useOriginalAPISpec);
-            instances4APIIDs.put(apiId, validator);
+            cacheInstanceApiIds.getCache().put(apiId, validator);
             Utils.traceMessage("Returning created OpenAPI validator for API-ID: " + apiId, TraceLevel.DEBUG);
             return validator;
         }
@@ -86,7 +90,6 @@ public class OpenAPIValidator {
     private OpenAPIValidator(String openAPISpec) {
         super();
         try {
-            exposurePath2SpecifiedPathMap.setMaxSize(1000);
             // Check if openAPISpec is a valid URL
             new URI(openAPISpec);
             // If it does not fail, load it from the URL
@@ -133,13 +136,14 @@ public class OpenAPIValidator {
 
         boolean cachePath = false;
         // Perhaps the path has already looked up and matched to the specified path (e.g. /petstore/v3/store/order/78787 --> /store/order/{orderId}
-        if (exposurePath2SpecifiedPathMap.containsKey(path)) {
-            if (exposurePath2SpecifiedPathMap.get(path) instanceof ValidationReport) {
+        var cachePathExposure = cacheExposurePath2SpecifiedPathMap.getCache().getIfPresent(path);
+        if (cachePathExposure != null) {
+            if (cachePathExposure instanceof ValidationReport) {
                 // Previously with the given we got a validation error, just return the same again
-                validationReport = (ValidationReport) exposurePath2SpecifiedPathMap.get(path);
+                validationReport = (ValidationReport) cachePathExposure;
             } else {
                 // In that case perform the validation based on the cached path
-                validationReport = _validateRequest(payload, verb, (String) exposurePath2SpecifiedPathMap.get(path), queryParams, headers);
+                validationReport = _validateRequest(payload, verb, (String) cachePathExposure, queryParams, headers);
             }
         } else {
             // Otherwise try to find the belonging specified path
@@ -173,9 +177,9 @@ public class OpenAPIValidator {
             if (cachePath) {
                 if (validationReport.hasErrors() && validationReport.getMessages().toString().contains("No API path found that matches request")) {
                     // Finally no match found, cache the returned validation report
-                    exposurePath2SpecifiedPathMap.put(originalPath, validationReport);
+                    cacheExposurePath2SpecifiedPathMap.getCache().put(originalPath, validationReport);
                 } else {
-                    exposurePath2SpecifiedPathMap.put(originalPath, path);
+                    cacheExposurePath2SpecifiedPathMap.getCache().put(originalPath, path);
                 }
             }
         }
