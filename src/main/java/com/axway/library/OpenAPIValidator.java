@@ -23,9 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 /**
@@ -278,24 +276,6 @@ public class OpenAPIValidator {
             }
         }
         return validationReport;
-    }
-
-    static class MaxSizeHashMap<K, V> extends LinkedHashMap<K, V> {
-
-        private static final long serialVersionUID = 1L;
-
-        private int maxSize;
-
-        @Override
-        protected boolean removeEldestEntry(Entry<K, V> eldest) {
-            return size() > maxSize;
-        }
-
-        public void setMaxSize(int maxSize) {
-            // Reset the cache if the maxSize is set
-            clear();
-            this.maxSize = maxSize;
-        }
     }
 
 }
