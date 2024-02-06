@@ -25,6 +25,8 @@
     </properties>
 
     <dependencies>
+
+        <!-- please check compatibility with your axway version -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
@@ -35,6 +37,8 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-core.version}</version>
         </dependency>
+        <!-- please check compatibility with your axway version -->
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
