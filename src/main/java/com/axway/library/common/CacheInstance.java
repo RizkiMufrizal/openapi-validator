@@ -14,7 +14,7 @@ public class CacheInstance {
         cache = CacheContainer.getInstance().getCache(name);
     }
 
-    public void addCache(String key, Object value) {
+    public <T> void addCache(T key, Object value) {
         var element = cache.get(key);
         if (element != null) {
             cache.removeElement(element);
@@ -23,22 +23,11 @@ public class CacheInstance {
         cache.put(element);
     }
 
-    public void addCache(Integer key, Object value) {
-        var element = cache.get(key);
-        if (element != null) {
-            cache.removeElement(element);
+    public <T, K> T getCache(K key, Class<T> clazz) {
+        Element element = cache.get(key);
+        if (element == null) {
+            return null;
         }
-        element = new Element(key, value);
-        cache.put(element);
-    }
-
-    public <T> T getCache(String key, Class<T> clazz) {
-        Element element = cache.get(key);
-        return clazz.cast(element.getObjectValue());
-    }
-
-    public <T> T getCache(Integer key, Class<T> clazz) {
-        Element element = cache.get(key);
         return clazz.cast(element.getObjectValue());
     }
 }
