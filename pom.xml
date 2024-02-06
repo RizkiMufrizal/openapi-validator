@@ -18,7 +18,7 @@
         <apigateway.version>7.7.0.20230830</apigateway.version>
         <apigateway.library.version>7.7.0.20230830-3</apigateway.library.version>
         <apigateway.common.version>2.11.0</apigateway.common.version>
-        <jackson-core.version>2.16.0</jackson-core.version>
+        <jackson-core.version>2.15.2</jackson-core.version>
         <httpclient5.version>5.3</httpclient5.version>
         <swagger-request-validator-core.version>2.39.0</swagger-request-validator-core.version>
         <caffeine.version>3.1.8</caffeine.version>
@@ -28,6 +28,11 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
+            <version>${jackson-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
             <version>${jackson-core.version}</version>
         </dependency>
         <dependency>
