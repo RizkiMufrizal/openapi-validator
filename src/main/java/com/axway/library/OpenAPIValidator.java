@@ -6,9 +6,7 @@ import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.Response;
 import com.atlassian.oai.validator.report.ValidationReport;
 import com.atlassian.oai.validator.report.ValidationReport.Message;
-import com.axway.library.common.CacheExposurePath2SpecifiedPathMap;
 import com.axway.library.common.CacheInstance;
-import com.axway.library.common.CacheInstanceAPIIDs;
 import com.axway.library.common.Constant;
 import com.axway.library.common.TraceLevel;
 import com.axway.library.common.Utils;
@@ -31,11 +29,7 @@ import java.util.Optional;
  */
 public class OpenAPIValidator {
 
-    private static final CacheInstance cacheInstance = CacheInstance.getInstance();
-
-    private static final CacheInstanceAPIIDs cacheInstanceApiIds = CacheInstanceAPIIDs.getInstance();
-
-    private static final CacheExposurePath2SpecifiedPathMap cacheExposurePath2SpecifiedPathMap = CacheExposurePath2SpecifiedPathMap.getInstance();
+    private static final CacheInstance cacheInstance = new CacheInstance("Cache-Swagger");
 
     private OpenApiInteractionValidator validator;
 
@@ -48,14 +42,14 @@ public class OpenAPIValidator {
 
     public static OpenAPIValidator getInstance(String openAPISpec) {
         int hashCode = openAPISpec.hashCode();
-        var openAPIValidator = cacheInstance.getCache().getIfPresent(hashCode);
+        var openAPIValidator = cacheInstance.getCache(hashCode, OpenAPIValidator.class);
         if (openAPIValidator != null) {
             Utils.traceMessage("Using existing OpenAPIValidator instance for API-Specification.", TraceLevel.INFO);
             return openAPIValidator;
         } else {
             Utils.traceMessage("Creating new OpenAPI validator instance for given API-Specification.", TraceLevel.INFO);
             OpenAPIValidator validator = new OpenAPIValidator(openAPISpec);
-            cacheInstance.getCache().put(hashCode, validator);
+            cacheInstance.addCache(hashCode, validator);
             return validator;
         }
     }
@@ -73,13 +67,13 @@ public class OpenAPIValidator {
     }
 
     public static OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version, boolean useOriginalAPISpec) throws Exception {
-        var openAPIValidator = cacheInstanceApiIds.getCache().getIfPresent(apiId);
+        var openAPIValidator = cacheInstance.getCache(apiId, OpenAPIValidator.class);
         if (openAPIValidator != null) {
             Utils.traceMessage("Using cached instance of OpenAPI validator for API-ID: " + apiId, TraceLevel.DEBUG);
             return openAPIValidator;
         } else {
             OpenAPIValidator validator = new OpenAPIValidator(apiId, username, password, apiManagerUrl, version, useOriginalAPISpec);
-            cacheInstanceApiIds.getCache().put(apiId, validator);
+            cacheInstance.addCache(apiId, validator);
             Utils.traceMessage("Returning created OpenAPI validator for API-ID: " + apiId, TraceLevel.DEBUG);
             return validator;
         }
@@ -134,7 +128,7 @@ public class OpenAPIValidator {
 
         boolean cachePath = false;
         // Perhaps the path has already looked up and matched to the specified path (e.g. /petstore/v3/store/order/78787 --> /store/order/{orderId}
-        var cachePathExposure = cacheExposurePath2SpecifiedPathMap.getCache().getIfPresent(path);
+        var cachePathExposure = cacheInstance.getCache(path, Object.class);
         if (cachePathExposure != null) {
             if (cachePathExposure instanceof ValidationReport) {
                 // Previously with the given we got a validation error, just return the same again
@@ -175,9 +169,9 @@ public class OpenAPIValidator {
             if (cachePath) {
                 if (validationReport.hasErrors() && validationReport.getMessages().toString().contains("No API path found that matches request")) {
                     // Finally no match found, cache the returned validation report
-                    cacheExposurePath2SpecifiedPathMap.getCache().put(originalPath, validationReport);
+                    cacheInstance.addCache(originalPath, validationReport);
                 } else {
-                    cacheExposurePath2SpecifiedPathMap.getCache().put(originalPath, path);
+                    cacheInstance.addCache(originalPath, path);
                 }
             }
         }

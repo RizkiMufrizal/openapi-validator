@@ -1,29 +1,44 @@
 package com.axway.library.common;
 
-import com.axway.library.OpenAPIValidator;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.vordel.circuit.cache.CacheContainer;
 import lombok.Getter;
+import net.sf.ehcache.Cache;
+import net.sf.ehcache.Element;
 
 public class CacheInstance {
 
-    private static volatile CacheInstance _instance;
-
     @Getter
-    private final Cache<Integer, OpenAPIValidator> cache;
+    private final Cache cache;
 
-    public CacheInstance() {
-        cache = Caffeine.newBuilder().maximumSize(1000).build();
+    public CacheInstance(String name) {
+        cache = CacheContainer.getInstance().getCache(name);
     }
 
-    public static CacheInstance getInstance() {
-        if (_instance == null) {
-            synchronized (CacheInstance.class) {
-                if (_instance == null) {
-                    _instance = new CacheInstance();
-                }
-            }
+    public void addCache(String key, Object value) {
+        var element = cache.get(key);
+        if (element != null) {
+            cache.removeElement(element);
         }
-        return _instance;
+        element = new Element(key, value);
+        cache.put(element);
+    }
+
+    public void addCache(Integer key, Object value) {
+        var element = cache.get(key);
+        if (element != null) {
+            cache.removeElement(element);
+        }
+        element = new Element(key, value);
+        cache.put(element);
+    }
+
+    public <T> T getCache(String key, Class<T> clazz) {
+        Element element = cache.get(key);
+        return clazz.cast(element.getObjectValue());
+    }
+
+    public <T> T getCache(Integer key, Class<T> clazz) {
+        Element element = cache.get(key);
+        return clazz.cast(element.getObjectValue());
     }
 }

@@ -21,7 +21,7 @@
         <jackson-core.version>2.15.2</jackson-core.version>
         <httpclient5.version>5.3</httpclient5.version>
         <swagger-request-validator-core.version>2.39.0</swagger-request-validator-core.version>
-        <caffeine.version>3.1.8</caffeine.version>
+        <ehcache.version>2.10.9.2</ehcache.version>
     </properties>
 
     <dependencies>
@@ -56,9 +56,9 @@
             <version>${swagger-request-validator-core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.github.ben-manes.caffeine</groupId>
-            <artifactId>caffeine</artifactId>
-            <version>${caffeine.version}</version>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>${ehcache.version}</version>
         </dependency>
 
         <!-- api gw dependencies -->
@@ -82,6 +82,20 @@
             <version>${apigateway.library.version}</version>
             <scope>system</scope>
             <systemPath>${basedir}/apigw-dependencies/${apigateway.version}/vordel-trace.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.vordel</groupId>
+            <artifactId>vordel-core-circuit-cache</artifactId>
+            <version>${apigateway.library.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/apigw-dependencies/${apigateway.version}/vordel-core-circuit-cache.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.vordel.config</groupId>
+            <artifactId>vordel-config</artifactId>
+            <version>${apigateway.library.version}</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/apigw-dependencies/${apigateway.version}/vordel-config.jar</systemPath>
         </dependency>
     </dependencies>
 

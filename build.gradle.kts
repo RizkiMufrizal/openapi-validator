@@ -29,12 +29,13 @@ object DependencyVersions {
     const val HTTPCLIENT5 = "5.3"
     const val SWAGGER_REQUEST_VALIDATOR_CORE = "2.39.0"
     const val APIGW_DEPENDENCY = "7.7.0.20230830"
-    const val CAFFEINE = "3.1.8"
+    const val EHCACHE = "2.10.9.2"
 }
 
 dependencies {
-    implementation("com.github.ben-manes.caffeine:caffeine:${DependencyVersions.CAFFEINE}")
+    implementation("net.sf.ehcache:ehcache:${DependencyVersions.EHCACHE}")
     implementation("com.fasterxml.jackson.core:jackson-core:${DependencyVersions.JACKSON_CORE}")
+    implementation("com.fasterxml.jackson.core:jackson-databind:${DependencyVersions.JACKSON_CORE}")
     compileOnly("org.projectlombok:lombok:${DependencyVersions.LOMBOK}")
     annotationProcessor("org.projectlombok:lombok:${DependencyVersions.LOMBOK}")
     implementation("org.apache.httpcomponents.client5:httpclient5:${DependencyVersions.HTTPCLIENT5}")
