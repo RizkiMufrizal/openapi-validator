@@ -75,7 +75,7 @@ public class HttpComponentExecution extends HttpUriRequestBase {
                     mapLogResponse.put("responseBody", "");
                 }
                 mapLog.put("response", mapLogResponse);
-                Utils.traceMessage(JacksonObject.objectMapper().writeValueAsString(mapLog), TraceLevel.INFO);
+                Utils.traceMessage(JacksonObject.objectMapper().writeValueAsString(mapLog), TraceLevel.DEBUG);
                 return httpResponse;
             });
         } catch (SocketTimeoutException e) {

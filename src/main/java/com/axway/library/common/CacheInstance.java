@@ -1,13 +1,11 @@
 package com.axway.library.common;
 
 import com.vordel.circuit.cache.CacheContainer;
-import lombok.Getter;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 public class CacheInstance {
 
-    @Getter
     private final Cache cache;
 
     public CacheInstance(String name) {

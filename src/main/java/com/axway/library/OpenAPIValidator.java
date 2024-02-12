@@ -15,6 +15,7 @@ import com.vordel.mime.QueryStringHeaderSet;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +28,7 @@ import java.util.Optional;
 /**
  * OpenAPIValidator
  */
-public class OpenAPIValidator {
+public class OpenAPIValidator implements Serializable {
 
     private static final CacheInstance cacheInstance = new CacheInstance("Cache-Swagger");
 
@@ -40,9 +41,10 @@ public class OpenAPIValidator {
     @Setter
     private boolean decodeQueryParams = true;
 
-    public static OpenAPIValidator getInstance(String openAPISpec) {
+    public static synchronized OpenAPIValidator getInstance(String openAPISpec) {
         int hashCode = openAPISpec.hashCode();
         var openAPIValidator = cacheInstance.getCache(hashCode, OpenAPIValidator.class);
+        Utils.traceMessage("Cache Key : " + hashCode, TraceLevel.INFO);
         if (openAPIValidator != null) {
             Utils.traceMessage("Using existing OpenAPIValidator instance for API-Specification.", TraceLevel.INFO);
             return openAPIValidator;
@@ -54,20 +56,21 @@ public class OpenAPIValidator {
         }
     }
 
-    public static OpenAPIValidator getInstance(String apiId, String username, String password, boolean useOriginalAPISpec) throws Exception {
+    public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password, boolean useOriginalAPISpec) throws Exception {
         return getInstance(apiId, username, password, Constant.apiManagerURL, Constant.apiManagerVersion, useOriginalAPISpec);
     }
 
-    public static OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version) throws Exception {
+    public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version) throws Exception {
         return getInstance(apiId, username, password, apiManagerUrl, version, false);
     }
 
-    public static OpenAPIValidator getInstance(String apiId, String username, String password) throws Exception {
+    public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password) throws Exception {
         return getInstance(apiId, username, password, Constant.apiManagerURL, Constant.apiManagerVersion, false);
     }
 
-    public static OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version, boolean useOriginalAPISpec) throws Exception {
+    public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version, boolean useOriginalAPISpec) throws Exception {
         var openAPIValidator = cacheInstance.getCache(apiId, OpenAPIValidator.class);
+        Utils.traceMessage("Cache Key : " + apiId, TraceLevel.INFO);
         if (openAPIValidator != null) {
             Utils.traceMessage("Using cached instance of OpenAPI validator for API-ID: " + apiId, TraceLevel.DEBUG);
             return openAPIValidator;
@@ -100,8 +103,8 @@ public class OpenAPIValidator {
             APIManagerSchemaProvider schemaProvider = new APIManagerSchemaProvider(apiManagerUrl, version, username, password);
             schemaProvider.setUseOriginalAPISpec(useOriginalAPISpec);
             String apiSpecification = schemaProvider.getSchema(apiId);
-            /*** debug seb */
-            Utils.traceMessage("Api specification debug seb: " + apiSpecification, TraceLevel.INFO);
+            /* debug seb */
+            Utils.traceMessage("Api specification debug seb: " + apiSpecification, TraceLevel.DEBUG);
             this.validator = OpenApiInteractionValidator.createForInlineApiSpecification(apiSpecification).withResolveCombinators(true).build();
         } catch (ApiLoadException e) {
             Utils.traceMessage("The obtained API-Specification is not compatible with the OpenAPI validator.", e, TraceLevel.ERROR);
