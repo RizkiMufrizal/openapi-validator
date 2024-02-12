@@ -261,11 +261,6 @@ public class OpenAPIValidator implements Serializable {
         };
 
         var validationReport = validator.validateRequest(request);
-        if (validationReport.hasErrors()) {
-            for (Message message : validationReport.getMessages()) {
-                Utils.traceMessage(message.getMessage(), TraceLevel.valueOf(message.getLevel().name()));
-            }
-        }
         // Finally remove the Content-Type header if exists, as it exists additionally in http.content.headers
         Utils.removeContentTypeHeader(headers);
         return validationReport;
