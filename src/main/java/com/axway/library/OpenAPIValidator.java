@@ -10,6 +10,8 @@ import com.axway.library.common.CacheInstance;
 import com.axway.library.common.Constant;
 import com.axway.library.common.TraceLevel;
 import com.axway.library.common.Utils;
+import com.axway.library.object.MessageValidation;
+import com.axway.library.object.MessageValidationError;
 import com.vordel.mime.HeaderSet;
 import com.vordel.mime.QueryStringHeaderSet;
 import lombok.Getter;
@@ -22,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -115,11 +118,11 @@ public class OpenAPIValidator implements Serializable {
     }
 
     public boolean isValidRequest(String payload, String verb, String path, QueryStringHeaderSet queryParams, HeaderSet headers) {
-        ValidationReport validationReport = validateRequest(payload, verb, path, queryParams, headers);
-        return !validationReport.hasErrors();
+        var validationReport = validateRequest(payload, verb, path, queryParams, headers);
+        return !validationReport.getIsErrorFormat() && !validationReport.getIsErrorRequired();
     }
 
-    public ValidationReport validateRequest(String payload, String verb, String path, QueryStringHeaderSet queryParams, HeaderSet headers) {
+    public MessageValidationError validateRequest(String payload, String verb, String path, QueryStringHeaderSet queryParams, HeaderSet headers) {
         Utils.traceMessage("Validate request: [verb: " + verb + ", path: '" + path + "', payload: '" + Utils.getContentStart(payload, payloadLogMaxLength, true) + "']", TraceLevel.INFO);
         ValidationReport validationReport = null;
         String originalPath = path;
@@ -178,7 +181,27 @@ public class OpenAPIValidator implements Serializable {
                 }
             }
         }
-        return validationReport;
+
+        var messageValidationError = new MessageValidationError();
+        if (validationReport.hasErrors()) {
+            List<MessageValidation> messageValidationRequired = new ArrayList<>();
+            List<MessageValidation> messageValidationFormatError = new ArrayList<>();
+            for (Message message : validationReport.getMessages()) {
+                Utils.traceMessage(message.getMessage(), TraceLevel.valueOf(message.getLevel().name()));
+                var messageValidation = new MessageValidation(message.getKey(), message.getMessage().replaceAll("\"", ""));
+                if (message.getKey().contains("validation.request.body.schema.required")) {
+                    messageValidationRequired.add(messageValidation);
+                    messageValidationError.setMessageValidationRequired(messageValidationRequired);
+                    messageValidationError.setIsErrorRequired(true);
+                } else {
+                    messageValidationFormatError.add(messageValidation);
+                    messageValidationError.setMessageValidationFormatError(messageValidationFormatError);
+                    messageValidationError.setIsErrorFormat(true);
+                }
+            }
+        }
+
+        return messageValidationError;
     }
 
     public boolean isValidResponse(String payload, String verb, String path, int status, HeaderSet headers) {
@@ -237,7 +260,7 @@ public class OpenAPIValidator implements Serializable {
             }
         };
 
-        ValidationReport validationReport = validator.validateRequest(request);
+        var validationReport = validator.validateRequest(request);
         if (validationReport.hasErrors()) {
             for (Message message : validationReport.getMessages()) {
                 Utils.traceMessage(message.getMessage(), TraceLevel.valueOf(message.getLevel().name()));
