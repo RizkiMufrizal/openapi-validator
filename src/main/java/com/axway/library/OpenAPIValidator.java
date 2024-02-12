@@ -30,7 +30,7 @@ import java.util.Optional;
  */
 public class OpenAPIValidator implements Serializable {
 
-    private static final CacheInstance cacheInstance = new CacheInstance("Cache-Swagger");
+    private static final CacheInstance cacheInstance = new CacheInstance();
 
     private OpenApiInteractionValidator validator;
 
@@ -43,7 +43,7 @@ public class OpenAPIValidator implements Serializable {
 
     public static synchronized OpenAPIValidator getInstance(String openAPISpec) {
         int hashCode = openAPISpec.hashCode();
-        var openAPIValidator = cacheInstance.getCache(hashCode, OpenAPIValidator.class);
+        var openAPIValidator = cacheInstance.getCache("Cache-Swagger", hashCode, OpenAPIValidator.class);
         Utils.traceMessage("Cache Key : " + hashCode, TraceLevel.INFO);
         if (openAPIValidator != null) {
             Utils.traceMessage("Using existing OpenAPIValidator instance for API-Specification.", TraceLevel.INFO);
@@ -51,7 +51,7 @@ public class OpenAPIValidator implements Serializable {
         } else {
             Utils.traceMessage("Creating new OpenAPI validator instance for given API-Specification.", TraceLevel.INFO);
             OpenAPIValidator validator = new OpenAPIValidator(openAPISpec);
-            cacheInstance.addCache(hashCode, validator);
+            cacheInstance.addCache("Cache-Swagger", hashCode, validator);
             return validator;
         }
     }
@@ -69,14 +69,14 @@ public class OpenAPIValidator implements Serializable {
     }
 
     public static synchronized OpenAPIValidator getInstance(String apiId, String username, String password, String apiManagerUrl, String version, boolean useOriginalAPISpec) throws Exception {
-        var openAPIValidator = cacheInstance.getCache(apiId, OpenAPIValidator.class);
+        var openAPIValidator = cacheInstance.getCache("Cache-Swagger", apiId, OpenAPIValidator.class);
         Utils.traceMessage("Cache Key : " + apiId, TraceLevel.INFO);
         if (openAPIValidator != null) {
             Utils.traceMessage("Using cached instance of OpenAPI validator for API-ID: " + apiId, TraceLevel.DEBUG);
             return openAPIValidator;
         } else {
             OpenAPIValidator validator = new OpenAPIValidator(apiId, username, password, apiManagerUrl, version, useOriginalAPISpec);
-            cacheInstance.addCache(apiId, validator);
+            cacheInstance.addCache("Cache-Swagger", apiId, validator);
             Utils.traceMessage("Returning created OpenAPI validator for API-ID: " + apiId, TraceLevel.DEBUG);
             return validator;
         }
@@ -131,7 +131,7 @@ public class OpenAPIValidator implements Serializable {
 
         boolean cachePath = false;
         // Perhaps the path has already looked up and matched to the specified path (e.g. /petstore/v3/store/order/78787 --> /store/order/{orderId}
-        var cachePathExposure = cacheInstance.getCache(path, Object.class);
+        var cachePathExposure = cacheInstance.getCache("Cache-Swagger", path, Object.class);
         if (cachePathExposure != null) {
             if (cachePathExposure instanceof ValidationReport) {
                 // Previously with the given we got a validation error, just return the same again
@@ -172,9 +172,9 @@ public class OpenAPIValidator implements Serializable {
             if (cachePath) {
                 if (validationReport.hasErrors() && validationReport.getMessages().toString().contains("No API path found that matches request")) {
                     // Finally no match found, cache the returned validation report
-                    cacheInstance.addCache(originalPath, validationReport);
+                    cacheInstance.addCache("Cache-Swagger", originalPath, validationReport);
                 } else {
-                    cacheInstance.addCache(originalPath, path);
+                    cacheInstance.addCache("Cache-Swagger", originalPath, path);
                 }
             }
         }

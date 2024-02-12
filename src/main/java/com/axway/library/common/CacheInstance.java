@@ -1,18 +1,12 @@
 package com.axway.library.common;
 
 import com.vordel.circuit.cache.CacheContainer;
-import net.sf.ehcache.Cache;
 import net.sf.ehcache.Element;
 
 public class CacheInstance {
 
-    private final Cache cache;
-
-    public CacheInstance(String name) {
-        cache = CacheContainer.getInstance().getCache(name);
-    }
-
-    public <T> void addCache(T key, Object value) {
+    public <T> void addCache(String name, T key, Object value) {
+        var cache = CacheContainer.getInstance().getCache(name);
         var element = cache.get(key);
         if (element != null) {
             cache.removeElement(element);
@@ -21,7 +15,8 @@ public class CacheInstance {
         cache.put(element);
     }
 
-    public <T, K> T getCache(K key, Class<T> clazz) {
+    public <T, K> T getCache(String name, K key, Class<T> clazz) {
+        var cache = CacheContainer.getInstance().getCache(name);
         Element element = cache.get(key);
         if (element == null) {
             return null;
