@@ -1,6 +1,6 @@
 # Open API Validator
 
-This library was created to complement the latest version of Axway. This library is inspired by [openapi-validator](https://github.com/Axway-API-Management-Plus/openapi-validator).
+This library was created to complement the latest version of Axway API Gateway. This library is inspired by [openapi-validator](https://github.com/Axway-API-Management-Plus/openapi-validator).
 
 # Build
 
@@ -19,6 +19,12 @@ gradle clean build
 # Installation
 
 To install, put the jar under ext/lib. After that, restart the API Gateway. It is recommended to make the jars files known in the Policy Studio as well as it is describe here: https://docs.axway.com/bundle/axway-open-docs/page/docs/apim_policydev/apigw_poldev/general_ps_settings/index.html#runtime-dependencies
+
+# Setup Cache
+
+This library uses the cache from the axway api gateway's built-in ehcache to store the swagger configuration. Please create 1 cache via policy studio with the following configuration.
+
+![cache](./images/cache.png)
 
 # Example Code
 
