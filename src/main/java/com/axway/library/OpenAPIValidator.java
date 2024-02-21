@@ -189,7 +189,7 @@ public class OpenAPIValidator implements Serializable {
             for (Message message : validationReport.getMessages()) {
                 Utils.traceMessage(message.getMessage(), TraceLevel.valueOf(message.getLevel().name()));
                 var messageValidation = new MessageValidation(message.getKey(), message.getMessage().replaceAll("\"", ""));
-                if (message.getKey().contains("validation.request.body.schema.required") || message.getKey().contains("validation.request.parameter.header.missing")) {
+                if (message.getKey().contains("validation.request.body.schema.required") || message.getKey().contains("validation.request.parameter.header.missing") || message.getKey().contains("validation.request.parameter.query.missing")) {
                     messageValidationRequired.add(messageValidation);
                     messageValidationError.setMessageValidationRequired(messageValidationRequired);
                     messageValidationError.setIsErrorRequired(true);
