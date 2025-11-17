@@ -6,21 +6,21 @@
 
     <groupId>com.axway.library</groupId>
     <artifactId>openapi-validator</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
         <lombok.version>1.18.30</lombok.version>
-        <apigateway.version>7.7.0.20230830</apigateway.version>
-        <apigateway.library.version>7.7.0.20230830-3</apigateway.library.version>
-        <apigateway.common.version>2.11.0</apigateway.common.version>
+        <apigateway.version>7.7.0-20250530</apigateway.version>
+        <apigateway.library.version>7.7.0.20250530-1</apigateway.library.version>
+        <apigateway.common.version>2.12.1</apigateway.common.version>
         <jackson-core.version>2.15.2</jackson-core.version>
         <httpclient5.version>5.3</httpclient5.version>
-        <swagger-request-validator-core.version>2.39.0</swagger-request-validator-core.version>
+        <swagger-request-validator-core.version>2.46.0</swagger-request-validator-core.version>
         <ehcache.version>2.10.9.2</ehcache.version>
     </properties>
 

@@ -92,6 +92,12 @@ def bodyAsString(body) {
 
 This artefact has been tested with API-Management Versions
 
-| Version      | Comment         |
-|:-------------| :---            |
-| 7.7-20230830 |                 |
+| Version | API Gateway Version | Comment         |
+|:--------|:--------------------| :---            |
+| 1.0.0   | 7.7-20230830        |                 |
+| 1.0.1   | 7.7-20250530        |                 |
+
+# File Jar Folder
+
+1. Axway-7.7.0/apigateway/system/lib/plugins
+2. Axway-7.7.0/apigateway/system/lib
